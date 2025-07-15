@@ -23,57 +23,64 @@ const Sidebar = ({ role }) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Mobile overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-30 transition-opacity duration-300 ease-in-out ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        } md:hidden`}
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar container */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 z-40 transform transition-transform duration-300 
-        bg-gradient-to-b from-white to-gray-100 shadow-lg 
+        className={`fixed top-0 left-0 h-screen w-64 z-40 bg-white/30 backdrop-blur-xl shadow-lg border-r border-white/20 
+        transition-transform duration-500 ease-in-out transform
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        md:translate-x-0 md:static md:shadow-none`}
+        md:translate-x-0 md:static md:shadow-none md:border-none`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-indigo-600 select-none">DocuChain</h2>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/30">
+          <h2 className="text-2xl font-bold text-indigo-700 tracking-tight">DocuChain</h2>
           <button
-            className="md:hidden text-gray-600 hover:text-indigo-600 focus:outline-none"
+            className="md:hidden text-gray-600 hover:text-indigo-600 transition"
             onClick={() => setIsOpen(false)}
           >
             <FiX size={24} />
           </button>
         </div>
 
-        <nav className="mt-6">
-          {navItems.map(({ label, icon, path }) => {
+        {/* Navigation */}
+        <nav className="mt-6 space-y-2 px-2">
+          {navItems.map(({ label, icon, path }, i) => {
             const isActive = location.pathname === path;
             return (
               <Link
-                to={path}
                 key={label}
-                className={`flex items-center px-6 py-3 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors
-                ${isActive ? "bg-indigo-100 text-indigo-700 font-semibold" : ""}`}
+                to={path}
                 onClick={() => setIsOpen(false)}
+                className={`flex items-center gap-3 px-5 py-3 rounded-lg text-sm font-medium transition-all duration-300
+                  ${
+                    isActive
+                      ? "bg-indigo-200/60 text-indigo-800 shadow-inner"
+                      : "text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 hover:shadow-md"
+                  }`}
+                style={{ animationDelay: `${i * 0.05}s` }}
               >
-                <span className="text-lg mr-3">{icon}</span>
-                <span className="truncate">{label}</span>
+                <span className="text-lg">{icon}</span>
+                <span>{label}</span>
               </Link>
             );
           })}
         </nav>
       </aside>
 
-      {/* Mobile Hamburger Button */}
+      {/* Toggle for mobile */}
       {!isOpen && (
         <button
-          className="fixed top-4 left-4 z-50 md:hidden bg-white border border-gray-300 rounded-md p-2 shadow-md focus:outline-none"
+          className="fixed top-4 left-4 z-50 md:hidden bg-white/40 backdrop-blur-md border border-gray-300 rounded-md p-2 shadow-md hover:border-indigo-400 transition"
           onClick={() => setIsOpen(true)}
         >
-          <FiMenu size={24} />
+          <FiMenu size={24} className="text-gray-700" />
         </button>
       )}
     </>

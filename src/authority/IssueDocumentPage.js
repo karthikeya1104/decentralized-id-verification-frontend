@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import { BACKEND_URL } from "../Config";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar"; // adjust path if needed
+import Sidebar from "../components/Sidebar";
+import { motion } from "framer-motion";
 
 const IssueDocumentPage = () => {
   const { user } = useContext(AuthContext);
@@ -55,11 +56,9 @@ const IssueDocumentPage = () => {
         },
       });
 
-      if (response.status !== 201) {
-        throw new Error("Failed to issue document");
-      }
+      if (response.status !== 201) throw new Error("Failed to issue document");
 
-      setResult(response.data.document); // assuming it's in .document
+      setResult(response.data.document);
       setPreviewURL(null);
       reset();
     } catch (error) {
@@ -68,120 +67,136 @@ const IssueDocumentPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-indigo-300 via-purple-100 to-blue-100 overflow-hidden relative">
+      {/* Glass blur blobs */}
+      <div className="absolute w-[600px] h-[600px] bg-purple-400 opacity-20 rounded-full blur-[160px] -top-32 -left-32" />
+      <div className="absolute w-[400px] h-[400px] bg-indigo-300 opacity-20 rounded-full blur-[130px] bottom-[-100px] right-[-100px]" />
+
       <Sidebar role="authority" />
 
-      <div className="flex-1 p-8">
-        <div className="max-w-xl mx-auto p-6 bg-white rounded shadow">
-          <h1 className="text-2xl font-bold mb-6">Issue Document</h1>
+      <main className="flex-1 px-6 py-10 z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-2xl mx-auto bg-white/30 backdrop-blur-md shadow-xl rounded-xl p-8 border border-white/20"
+        >
+          <h1 className="text-3xl font-bold text-indigo-700 mb-6 text-center">
+            📝 Issue New Document
+          </h1>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Receiver */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Receiver ID */}
             <div>
-              <label className="block mb-1 font-semibold">Receiver Public ID</label>
+              <label className="block mb-1 font-medium text-gray-800">Receiver Public ID</label>
               <input
                 type="text"
                 {...register("receiver_id", { required: "Receiver ID is required" })}
-                className="w-full border px-3 py-2 rounded"
-                placeholder="Enter receiver's public ID"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                placeholder="e.g. public123xyz"
               />
-              {errors.receiver_id && <p className="text-red-600">{errors.receiver_id.message}</p>}
+              {errors.receiver_id && <p className="text-red-600 text-sm">{errors.receiver_id.message}</p>}
             </div>
 
             {/* Title */}
             <div>
-              <label className="block mb-1 font-semibold">Title</label>
+              <label className="block mb-1 font-medium text-gray-800">Document Title</label>
               <input
                 type="text"
                 {...register("title", { required: "Title is required" })}
-                className="w-full border px-3 py-2 rounded"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
-              {errors.title && <p className="text-red-600">{errors.title.message}</p>}
+              {errors.title && <p className="text-red-600 text-sm">{errors.title.message}</p>}
             </div>
 
             {/* File */}
             <div>
-              <label className="block mb-1 font-semibold">File</label>
+              <label className="block mb-1 font-medium text-gray-800">Document File</label>
               <input
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg"
                 {...register("file", { required: "File is required" })}
-                className="w-full"
+                className="w-full text-sm"
               />
-              {errors.file && <p className="text-red-600">{errors.file.message}</p>}
+              {errors.file && <p className="text-red-600 text-sm">{errors.file.message}</p>}
             </div>
 
             {/* Image Preview */}
             {previewURL && (
               <div className="mt-4">
-                <p className="font-semibold text-sm text-gray-700 mb-1">Image Preview:</p>
-                <img
-                  src={previewURL}
-                  alt="Preview"
-                  className="w-full max-h-80 object-contain border rounded"
-                />
+                <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                <div className="bg-white/20 p-3 border rounded-md">
+                  <img
+                    src={previewURL}
+                    alt="Preview"
+                    className="w-full max-h-80 object-contain rounded-md"
+                  />
+                </div>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+              className="w-full bg-indigo-600 text-white font-semibold py-2 rounded-md hover:bg-indigo-700 transition disabled:opacity-50"
             >
-              {isSubmitting ? "Issuing..." : "Issue Document"}
+              {isSubmitting ? "Issuing..." : "🚀 Issue Document"}
             </button>
           </form>
 
-          {/* Response */}
+          {/* Result Feedback */}
           {result && (
-            <div className="mt-8 bg-white border border-green-300 shadow-md rounded-lg p-6 max-w-xl mx-auto space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-10 bg-white/30 backdrop-blur-md border border-white/20 shadow-md rounded-lg p-6 space-y-4"
+            >
               {result.error ? (
-                <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-300">
-                  <p className="font-semibold flex items-center gap-2">
-                    <span>⚠️</span>Error:
-                  </p>
+                <div className="bg-red-100 text-red-700 p-4 rounded-md border border-red-300">
+                  <p className="font-semibold flex items-center gap-2">⚠️ Error:</p>
                   <p>{result.error}</p>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-xl font-bold text-green-700 mb-4 flex items-center gap-2">
-                    <span>✅</span> Document Issued Successfully
+                  <h2 className="text-xl font-semibold text-green-700 flex items-center gap-2">
+                    ✅ Document Issued Successfully
                   </h2>
 
-                  <div className="space-y-1 text-gray-800">
+                  <div className="text-gray-800 space-y-1 text-sm">
                     <p><strong>📄 Title:</strong> {result.title}</p>
-                    <p><strong>👤 Receiver:</strong> {result.receiver_name} <span className="text-sm text-gray-600">({result.receiver_public_id})</span></p>
-                    <p className="font-mono break-all"><strong>🗃 IPFS Hash:</strong> {result.ipfs_hash}</p>
-                    <p className="font-mono break-all"><strong>🔗 Transaction Hash:</strong> {result.tx_hash}</p>
-                    <p><strong>📑 Document Index:</strong> {result.document_index}</p>
-                    <p><strong>⏰ Issued At:</strong> {new Date(result.issued_at || result.uploaded_at).toLocaleString()}</p>
+                    <p><strong>👤 Receiver:</strong> {result.receiver_name} <span className="text-gray-500">({result.receiver_public_id})</span></p>
+                    <p className="break-all"><strong>🗃 IPFS Hash:</strong> {result.ipfs_hash}</p>
+                    <p className="break-all"><strong>🔗 Tx Hash:</strong> {result.tx_hash}</p>
+                    <p><strong>📑 Index:</strong> {result.document_index}</p>
+                    <p><strong>⏰ Issued:</strong> {new Date(result.issued_at || result.uploaded_at).toLocaleString()}</p>
                   </div>
 
                   <a
                     href={`https://ipfs.io/ipfs/${result.ipfs_hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
-                    View on IPFS
+                    🔍 View on IPFS
                   </a>
 
-                  {/* Image preview: check mime-type from ipfs_hash extension */}
+                  {/* Image from IPFS */}
                   {result.ipfs_hash && /\.(jpg|jpeg|png|gif)$/i.test(result.ipfs_hash) && (
                     <div className="mt-6">
                       <img
                         src={`https://ipfs.io/ipfs/${result.ipfs_hash}`}
-                        alt="Issued Document Preview"
+                        alt="Issued Document"
                         className="w-full max-h-96 object-contain rounded border"
                       />
                     </div>
                   )}
                 </>
               )}
-            </div>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </main>
     </div>
   );
 };

@@ -1,6 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { HashLink as Link } from "react-router-hash-link";
-import { getStats } from "../services/statsService"; // Adjust path as needed
+import { motion } from "framer-motion";
+import { getStats } from "../services/statsService";
+import {
+  ArrowRightIcon,
+  CheckCircleIcon,
+  ShieldCheckIcon,
+  CloudUploadIcon,
+} from "@heroicons/react/outline";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 60, damping: 20 },
+  },
+};
 
 const Home = () => {
   const [stats, setStats] = useState({
@@ -10,127 +26,177 @@ const Home = () => {
   });
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const data = await getStats();
-      if (data) setStats(data);
-    };
-    fetchStats();
+    getStats().then((data) => data && setStats(data));
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-indigo-100 to-white">
-      {/* Navbar */}
-      <header className="w-full bg-white shadow sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-indigo-700 select-none">DocuChain</h1>
-        <nav className="hidden md:flex gap-6 text-gray-700 font-medium">
-          <Link smooth to="#about" className="hover:text-indigo-600">
-            About
-          </Link>
-          <Link smooth to="#features" className="hover:text-indigo-600">
-            Features
-          </Link>
-          <Link smooth to="#stats" className="hover:text-indigo-600">
-            Stats
-          </Link>
-          <Link smooth to="#login" className="hover:text-indigo-600">
-            Login
-          </Link>
+    <div className="relative bg-gradient-to-br from-indigo-200 via-purple-100 to-blue-100 min-h-screen scroll-smooth overflow-x-hidden">
+      {/* Background Blobs */}
+      <div className="absolute top-[-150px] left-[-100px] w-[250px] h-[250px] bg-purple-300 opacity-10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-120px] right-[-80px] w-[220px] h-[220px] bg-indigo-300 opacity-10 rounded-full blur-[70px] pointer-events-none" />
+
+      {/* Header */}
+      <motion.header
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="fixed top-0 w-full z-50 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-white/30 border-b border-white/20 shadow-sm"
+      >
+        <h1 className="text-2xl font-bold text-indigo-700 tracking-tight">
+          DocuChain
+        </h1>
+
+        <nav className="hidden md:flex space-x-8 text-gray-700 font-medium">
+          {["about", "features", "stats", "login"].map((section) => (
+            <Link
+              smooth
+              to={`#${section}`}
+              key={section}
+              className="relative group transition-colors duration-300 capitalize"
+            >
+              <span className="group-hover:text-indigo-600">{section}</span>
+              <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-indigo-600 group-hover:w-full transition-all" />
+            </Link>
+          ))}
         </nav>
-      </header>
+      </motion.header>
 
       {/* Hero Section */}
-      <section id="login" className="flex flex-col items-center justify-center text-center py-20 px-6">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-indigo-700 mb-4 scroll-mt-24">
-          Welcome to DocuChain
-        </h1>
-        <p className="text-lg md:text-xl text-gray-700 max-w-3xl mb-8">
-          A decentralized platform for secure and verifiable document management. Built for users and authorities to ensure transparency and trust.
-        </p>
-        <div id="login" className="flex flex-col sm:flex-row gap-4 justify-center">
+      <section id="login" className="pt-28 pb-20 px-6 text-center">
+        <motion.h1
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-5xl md:text-6xl font-extrabold text-indigo-700 mb-4"
+        >
+          Secure your documents with{" "}
+          <span className="text-indigo-600">blockchain</span>
+        </motion.h1>
+        <motion.p
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-xl text-gray-700 max-w-2xl mx-auto mb-8"
+        >
+          Upload, verify, and manage documents with transparency, trust, and
+          ease.
+        </motion.p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="flex flex-col sm:flex-row justify-center gap-4"
+        >
           <Link
             to="/login"
-            className="px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md text-lg transition duration-300"
+            className="px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-lg flex items-center gap-2 transition"
           >
-            Login as User
+            Login as User <ArrowRightIcon className="w-5 h-5" />
           </Link>
           <Link
             to="/login"
-            className="px-6 py-3 text-indigo-600 border border-indigo-600 hover:bg-indigo-100 rounded-md shadow-md text-lg transition duration-300"
+            className="px-6 py-4 border-2 border-indigo-600 hover:bg-indigo-100 text-indigo-600 rounded-md shadow-lg flex items-center gap-2 transition"
           >
-            Login as Authority
+            Login as Authority <ShieldCheckIcon className="w-5 h-5" />
           </Link>
-        </div>
+        </motion.div>
       </section>
 
-      {/* About Section */}
+      {/* About */}
       <section
         id="about"
-        className="bg-white rounded-lg shadow-md p-8 my-12 max-w-5xl mx-auto scroll-mt-24"
+        className="max-w-4xl mx-auto p-8 mb-12 bg-white/30 backdrop-blur-md rounded-xl shadow-lg scroll-mt-24"
       >
-        <h2 className="text-3xl font-bold text-indigo-700 mb-4 text-center">
+        <motion.h2
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-3xl font-bold text-indigo-700 mb-4 text-center"
+        >
           What is DocuChain?
-        </h2>
-        <p className="text-gray-700 text-lg text-center">
-          DocuChain is a blockchain-powered system that allows users to upload and manage identity documents while enabling authorities to issue and verify them. Say goodbye to forgery and hello to trust.
-        </p>
+        </motion.h2>
+        <motion.p
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-gray-700 text-lg text-center"
+        >
+          A blockchain-powered document management platform ensuring authenticity
+          and integrity. Empowering individuals and authorities with verifiable
+          trust.
+        </motion.p>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section
         id="features"
-        className="max-w-6xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center scroll-mt-24"
+        className="max-w-6xl mx-auto py-12 px-6 grid grid-cols-1 md:grid-cols-3 gap-8 scroll-mt-24"
       >
-        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition">
-          <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-            Decentralized & Secure
-          </h3>
-          <p className="text-gray-600">
-            Uses blockchain to ensure document authenticity and prevent tampering.
-          </p>
-        </div>
-        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition">
-          <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-            User-Focused
-          </h3>
-          <p className="text-gray-600">
-            Upload, manage, and flag lost documents — your identity, your control.
-          </p>
-        </div>
-        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition">
-          <h3 className="text-xl font-semibold text-indigo-600 mb-2">
-            Authority-Verified
-          </h3>
-          <p className="text-gray-600">
-            Authorized bodies can issue and verify documents instantly and securely.
-          </p>
-        </div>
+        {[
+          {
+            Icon: CloudUploadIcon,
+            title: "Upload & Store",
+            desc: "Securely store documents on IPFS with full user control.",
+          },
+          {
+            Icon: ShieldCheckIcon,
+            title: "Issue & Verify",
+            desc: "Authorities can issue & verify instantly on-chain.",
+          },
+          {
+            Icon: CheckCircleIcon,
+            title: "Immutable Trust",
+            desc: "Blockchain ensures tamper-proof and traceable records.",
+          },
+        ].map((f, i) => (
+          <motion.div
+            key={i}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ amount: 0.3, once: false }}
+            variants={fadeUp}
+            className="p-6 bg-white/30 backdrop-blur rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition"
+          >
+            <f.Icon className="w-8 h-8 text-indigo-600 mb-4 mx-auto" />
+            <h3 className="text-xl font-semibold text-indigo-700 mb-2 text-center">
+              {f.title}
+            </h3>
+            <p className="text-gray-600 text-center">{f.desc}</p>
+          </motion.div>
+        ))}
       </section>
 
-      {/* Stats Section */}
+      {/* Stats */}
       <section
         id="stats"
-        className="max-w-5xl mx-auto py-16 px-6 text-center"
+        className="max-w-5xl mx-auto py-16 px-6 text-center scroll-mt-24"
       >
-        <h2 className="text-3xl font-bold text-indigo-700 mb-6">Live Stats</h2>
+        <h2 className="text-3xl font-bold text-indigo-700 mb-8">Live Stats</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-4xl font-extrabold text-indigo-600">
-              {stats.documents_issued}
-            </h3>
-            <p className="mt-2 text-gray-700">Documents Issued</p>
-          </div>
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-4xl font-extrabold text-indigo-600">
-              {stats.documents_verified}
-            </h3>
-            <p className="mt-2 text-gray-700">Documents Verified</p>
-          </div>
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <h3 className="text-4xl font-extrabold text-indigo-600">
-              {stats.authorities_registered}
-            </h3>
-            <p className="mt-2 text-gray-700">Authorities Registered</p>
-          </div>
+          {[
+            { label: "Documents Issued", value: stats.documents_issued },
+            { label: "Documents Verified", value: stats.documents_verified },
+            { label: "Authorities Registered", value: stats.authorities_registered },
+          ].map((s, i) => (
+            <motion.div
+              key={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ amount: 0.3, once: false }}
+              variants={fadeUp}
+              className="p-6 bg-white/30 backdrop-blur rounded-xl shadow-lg"
+            >
+              <h3 className="text-5xl font-extrabold text-indigo-600">
+                {s.value}
+              </h3>
+              <p className="mt-2 text-gray-700">{s.label}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 

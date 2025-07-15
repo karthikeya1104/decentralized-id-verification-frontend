@@ -1,77 +1,103 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import AuthContext from "../context/AuthContext";
-import { BACKEND_URL } from "../Config";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = BACKEND_URL;
+import { getUserDashboard } from "../services/statsService";
+import { motion } from "framer-motion";
 
 const UserDashboard = () => {
-    const { user } = useContext(AuthContext);
-    const navigate = useNavigate();
-    const uploadedDocsCount = 8;
-    const issuedDocsCount = 5;
-    const flaggedDocsCount = 1;
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [uploadedDocsCount, setUploadedDocsCount] = useState(0);
+  const [issuedDocsCount, setIssuedDocsCount] = useState(0);
+  const [flaggedDocsCount, setFlaggedDocsCount] = useState(0);
 
-    useEffect(() => {
-        if (!user) navigate("/");
-        if (user?.role !== "user") {
-            navigate("/authority/");
-        }
-    }, [user, navigate]);
+  useEffect(() => {
+    if (!user) navigate("/");
+    if (user?.role !== "user") navigate("/authority/");
 
-    return (
-        <div className="flex flex-col md:flex-row min-h-screen w-full overflow-x-hidden bg-gray-50">
-            <Sidebar role="user" />
-            
-            <main className="flex-1 flex flex-col items-center justify-start px-4 py-6">
-                <h2 className="text-3xl font-semibold mb-6 text-indigo-700 text-center">User Dashboard</h2>
-                
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 w-full max-w-6xl">
-                    <div className="bg-white shadow rounded-lg p-6 text-center w-full">
-                        <h3 className="text-xl font-medium text-gray-700 mb-2">Uploaded Documents</h3>
-                        <p className="text-4xl font-bold text-indigo-600">{uploadedDocsCount}</p>
-                    </div>
-                    <div className="bg-white shadow rounded-lg p-6 text-center w-full">
-                        <h3 className="text-xl font-medium text-gray-700 mb-2">Documents Issued on You</h3>
-                        <p className="text-4xl font-bold text-indigo-600">{issuedDocsCount}</p>
-                    </div>
-                    <div className="bg-white shadow rounded-lg p-6 text-center w-full">
-                        <h3 className="text-xl font-medium text-gray-700 mb-2">Flagged Documents</h3>
-                        <p className="text-4xl font-bold text-red-600">{flaggedDocsCount}</p>
-                    </div>
-                </section>
+    const fetchDashboardStats = async () => {
+      try {
+        const data = await getUserDashboard();
+        setUploadedDocsCount(data.uploaded_documents);
+        setIssuedDocsCount(data.authority_issued_documents);
+        setFlaggedDocsCount(data.flagged_documents);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
 
-                <section className="w-full flex flex-col items-center gap-6 px-4 max-w-4xl">
-                    <div className="bg-white shadow rounded-lg p-6 w-full max-w-md text-center">
-                        <h3 className="text-2xl font-semibold mb-4 text-indigo-700">Upload a Document</h3>
-                        <p className="text-gray-600">Here users can upload their documents securely.</p>
-                    </div>
-                    <div className="bg-white shadow rounded-lg p-6 w-full max-w-md text-center">
-                        <h3 className="text-2xl font-semibold mb-4 text-indigo-700">View Your Documents</h3>
-                        <p className="text-gray-600">List and manage your uploaded and issued documents.</p>
-                    </div>
-                    <div className="bg-white shadow rounded-lg p-6 w-full max-w-md text-center">
-                        <h3 className="text-2xl font-semibold mb-4 text-indigo-700">Flag a Document</h3>
-                        <p className="text-gray-600">Report lost or invalid documents.</p>
-                    </div>
-                </section>
-            </main>
-        </div>
-    );
+    fetchDashboardStats();
+  }, [user, navigate]);
+
+  return (
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-indigo-300 via-purple-100 to-blue-100 overflow-hidden relative">
+      {/* Glass blur blobs */}
+      <div className="absolute w-[600px] h-[600px] bg-purple-400 opacity-20 rounded-full blur-[160px] -top-32 -left-32" />
+      <div className="absolute w-[400px] h-[400px] bg-indigo-300 opacity-20 rounded-full blur-[130px] bottom-[-100px] right-[-100px]" />
+
+      <Sidebar role="user" />
+
+      <main className="flex-1 flex flex-col px-6 py-10 space-y-12 z-10">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold text-indigo-700 text-center"
+        >
+          User Dashboard
+        </motion.h2>
+
+        {/* Stats Section */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <GlassStatCard color="indigo" title="Uploaded Documents" count={uploadedDocsCount} />
+          <GlassStatCard color="blue" title="Documents Issued on You" count={issuedDocsCount} />
+          <GlassStatCard color="red" title="Flagged Documents" count={flaggedDocsCount} />
+        </section>
+
+        {/* Actions Section */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <GlassActionCard title="📤 Upload a Document" description="Securely upload your personal documents." />
+          <GlassActionCard title="📁 View Your Documents" description="View and manage all your documents." />
+          <GlassActionCard title="🚩 Flag a Document" description="Report a lost or invalid document." />
+        </section>
+      </main>
+    </div>
+  );
 };
 
 export default UserDashboard;
 
-export const getUserDashboard = async (userId) => {
-    try {
-        const response = await fetch(`${API_URL}/user/${userId}/dashboard`);
-        if (!response.ok) {
-            throw new Error("Failed to fetch user dashboard data");
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching user dashboard:", error);
-        throw error;
-    }
+// 🧊 Stat Card with Glassmorphism
+const GlassStatCard = ({ title, count, color = "indigo" }) => {
+  const colorStyles = {
+    indigo: "text-indigo-600 border-indigo-400",
+    blue: "text-blue-600 border-blue-400",
+    red: "text-red-600 border-red-400",
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`bg-white/30 backdrop-blur-md shadow-lg rounded-xl p-6 border-l-4 ${colorStyles[color]} transform transition hover:scale-[1.03] hover:shadow-2xl`}
+    >
+      <h3 className="text-lg font-medium text-gray-700 mb-2">{title}</h3>
+      <p className={`text-5xl font-bold ${colorStyles[color]}`}>{count}</p>
+    </motion.div>
+  );
 };
+
+// 🧊 Action Card with Emoji and Glassmorphism
+const GlassActionCard = ({ title, description }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className="bg-white/30 backdrop-blur-md shadow-md rounded-xl p-6 text-center transform transition hover:scale-[1.03] hover:shadow-xl"
+  >
+    <h3 className="text-xl font-semibold text-indigo-700 mb-2">{title}</h3>
+    <p className="text-sm text-gray-700">{description}</p>
+  </motion.div>
+);

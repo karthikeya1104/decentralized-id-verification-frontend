@@ -12,3 +12,31 @@ export const getStats = async () => {
     return null;
   }
 };
+
+export const getAuthorityDashboard = async () => {
+  const response = await fetch(`${BACKEND_URL}/documents/authority/document-stats/`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch dashboard data");
+  return await response.json();
+};
+
+export const getUserDashboard = async () => {
+  try {
+    const response = await fetch(`${API_URL}/documents/user/document-stats/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch user dashboard data");
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching user dashboard:", error);
+    throw error;
+  }
+};

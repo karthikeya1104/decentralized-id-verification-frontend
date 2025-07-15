@@ -3,6 +3,7 @@ import AuthContext from "../context/AuthContext";
 import { BACKEND_URL } from "../Config";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const MyDocuments = () => {
   const { user } = useContext(AuthContext);
@@ -42,56 +43,82 @@ const MyDocuments = () => {
   }, [user, navigate]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full bg-gray-50">
-      <Sidebar role="user" />
-      <main className="flex-1 px-4 py-6 flex flex-col items-center">
-        <h2 className="text-3xl font-semibold text-indigo-700 mb-6 text-center">My Documents</h2>
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-indigo-300 via-purple-100 to-blue-100 overflow-hidden relative">
+      {/* Blurred blobs */}
+      <div className="absolute w-[600px] h-[600px] bg-purple-400 opacity-20 rounded-full blur-[160px] -top-32 -left-32" />
+      <div className="absolute w-[400px] h-[400px] bg-indigo-300 opacity-20 rounded-full blur-[130px] bottom-[-100px] right-[-100px]" />
 
-        <section className="w-full max-w-5xl mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Uploaded by Me</h3>
-          <div className="grid gap-4">
+      <Sidebar role="user" />
+
+      <main className="flex-1 px-6 py-10 flex flex-col items-center space-y-12 z-10">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold text-indigo-700 text-center"
+        >
+          📁 My Documents
+        </motion.h2>
+
+        {/* Uploaded Documents */}
+        <section className="w-full max-w-5xl">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">📤 Uploaded by Me</h3>
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
             {userDocs.length === 0 ? (
-              <p className="text-gray-500">No documents uploaded yet.</p>
+              <p className="text-gray-600">No documents uploaded yet.</p>
             ) : (
               userDocs.map((doc, index) => (
-                <div 
-                    key={index}
-                    onClick={() => navigate(`/documents/${doc.id}`, { state: { doc, source: "uploaded" } })}
-                    className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-100 transition"
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  onClick={() => navigate(`/documents/${doc.id}`, { state: { doc, source: "uploaded" } })}
+                  className="bg-white/30 backdrop-blur-md p-5 rounded-xl shadow-md hover:shadow-xl transition-transform hover:scale-[1.03] cursor-pointer"
                 >
-                  <p className="font-medium text-gray-800">{doc.title || "Untitled Document"}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(doc.uploaded_at).toLocaleString('en-US', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
+                  <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                    {doc.title || "Untitled Document"}
+                  </h4>
+                  <p className="text-sm text-gray-700">
+                    Uploaded on:{" "}
+                    {new Date(doc.uploaded_at).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
                     })}
                   </p>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
         </section>
 
+        {/* Issued Documents */}
         <section className="w-full max-w-5xl">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Issued to Me</h3>
-          <div className="grid gap-4">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">📨 Issued to Me</h3>
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
             {issuedDocs.length === 0 ? (
-              <p className="text-gray-500">No issued documents yet.</p>
+              <p className="text-gray-600">No issued documents yet.</p>
             ) : (
               issuedDocs.map((doc, index) => (
-                <div 
-                    key={index}
-                    onClick={() => navigate(`/documents/${doc.id}`, { state: { doc, source: "uploaded" } })}
-                    className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-100 transition"
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  onClick={() => navigate(`/documents/${doc.id}`, { state: { doc, source: "issued" } })}
+                  className="bg-white/30 backdrop-blur-md p-5 rounded-xl shadow-md hover:shadow-xl transition-transform hover:scale-[1.03] cursor-pointer"
                 >
-                  <p className="font-medium text-gray-800">{doc.title || "Untitled Issued Document"}</p>
-                  <p className="text-sm text-gray-500">Issued by: {doc.issuer_name || "Authority"}<br />  
-                    {new Date(doc.issued_at).toLocaleString('en-US', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
+                  <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                    {doc.title || "Untitled Issued Document"}
+                  </h4>
+                  <p className="text-sm text-gray-700">
+                    Issued by: {doc.issuer_name || "Authority"} <br />
+                    {new Date(doc.issued_at).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
                     })}
                   </p>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
